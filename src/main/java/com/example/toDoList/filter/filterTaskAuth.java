@@ -27,6 +27,11 @@ public class filterTaskAuth extends OncePerRequestFilter {
 
             //Pegar a autenticação (usuário e senha)
             var aut = request.getHeader("Authorization");
+
+            if(aut == null){
+                response.sendError(401,"Nenhum login informado.");
+            }
+
             var user_password = aut.substring("Basic".length()).trim();
 
             byte[] autDecode = Base64.getDecoder().decode(user_password);

@@ -18,7 +18,7 @@ public class taskContoller {
     @Autowired
     private iTaskRepository taskRepository;
 
-    @PostMapping("/")
+    @PostMapping("/create")
     public ResponseEntity create(@RequestBody taskModel task, HttpServletRequest request){
         var userId = (UUID) request.getAttribute("userId");
         task.setUserId(userId);
@@ -49,7 +49,7 @@ public class taskContoller {
         return tasks;
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/edit/{id}")
     public ResponseEntity update(@RequestBody taskModel taskEdit, HttpServletRequest request, @PathVariable UUID id){
         var userId = (UUID) request.getAttribute("userId");
 
@@ -68,6 +68,25 @@ public class taskContoller {
         this.taskRepository.save(existTask);
 
         return ResponseEntity.status(HttpStatus.OK).body(existTask);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteTask(HttpServletRequest request, @PathVariable UUID id){
+        var userId = (UUID) request.getAttribute("userId");
+
+        var existTask = this.taskRepository.findById(id).orElse(null);
+
+        if(existTask == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tarefa não encontrada.");
+        }
+
+        if(!existTask.getUserId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Usuário sem permissão para deletar a tarefa!");
+        }
+
+        this.taskRepository.deleteById(id);
+
+        return  ResponseEntity.status(HttpStatus.OK).body("Tarefa deletada");
     }
 
 }
